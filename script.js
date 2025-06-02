@@ -1,76 +1,109 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+// script.js
+// Note: ce fichier doit être chargé en <script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
 import {
   getFirestore,
   collection,
+  addDoc,
   getDocs,
-  addDoc
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 
-// Config Firebase
+// --- Config Firebase (remplace par ta config perso) ---
 const firebaseConfig = {
-  apiKey: "VOTRE_API_KEY",
-  authDomain: "VOTRE_PROJET.firebaseapp.com",
-  projectId: "VOTRE_PROJET",
-  storageBucket: "VOTRE_PROJET.appspot.com",
-  messagingSenderId: "XXX",
-  appId: "XXX"
+  apiKey: "AIzaSyA_uaTMNnsxIMSBhmWYDGOWVcaSPs6OcNo",
+  authDomain: "carte-paf-du-sud-9b81a.firebaseapp.com",
+  projectId: "carte-paf-du-sud-9b81a",
+  storageBucket: "carte-paf-du-sud-9b81a.appspot.com",
+  messagingSenderId: "1057159482652",
+  appId: "1:1057159482652:web:64cd2b0633e55a0ade7ed9",
 };
 
+// --- Initialise Firebase et Firestore ---
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Carte Leaflet
-const map = L.map("map").setView([48.8566, 2.3522], 5);
+// --- Initialiser la carte Leaflet ---
+const map = L.map("map").setView([48.8566, 2.3522], 5); // Centre Paris
+
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  attribution: "© OpenStreetMap"
+  attribution:
+    '© OpenStreetMap contributors',
 }).addTo(map);
 
-// Chargement des marqueurs
-async function chargerPoints() {
-  const snap = await getDocs(collection(db, "locations"));
-  snap.forEach((doc) => {
+// --- Fonction pour charger les marqueurs depuis Firestore ---
+async function loadMarkers() {
+  const querySnapshot = await getDocs(collection(db, "markers"));
+  querySnapshot.forEach((doc) => {
     const data = doc.data();
-    if (data.lat && data.lng && data.name) {
-      L.marker([data.lat, data.lng])
-        .addTo(map)
-        .bindPopup(`<strong>${data.name}</strong><br>${data.city}`);
-    }
+    L.marker([data.lat, data.lng])
+      .addTo(map)
+      .bindPopup(`${data.name} — ${data.city}`);
   });
 }
-chargerPoints();
 
-// Géocoder une ville
-async function geocoder(ville) {
-  const response = await fetch(
-    `https://nominatim.openstreetmap.org/search?format=json&q=${ville}`
-  );
-  const data = await response.json();
-  if (data.length === 0) throw new Error("Ville introuvable");
-  return {
-    lat: parseFloat(data[0].lat),
-    lng: parseFloat(data[0].lon)
-  };
-}
-
-// Ajout
-document.getElementById("form").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const name = document.getElementById("name").value;
-  const city = document.getElementById("city").value;
-  const adminCode = document.getElementById("admin-code").value;
-
+// --- Fonction pour ajouter un marqueur dans Firestore ---
+async function addMarker(name, city, lat, lng) {
   try {
-    const coords = await geocoder(city);
-    await addDoc(collection(db, "locations"), {
+    await addDoc(collection(db, "markers"), {
       name,
       city,
-      lat: coords.lat,
-      lng: coords.lng,
-      admin: adminCode === "1234"
+      lat,
+      lng,
+      createdAt: new Date(),
     });
-    alert("Ajouté !");
-    location.reload();
-  } catch (err) {
-    alert("Erreur : " + err.message);
+  } catch (e) {
+    alert("Erreur ajout marqueur : " + e.message);
+  }
+}
+
+// --- Géocoder la ville avec Nominatim (OpenStreetMap) ---
+async function getCoordsFromCity(city) {
+  const response = await fetch(
+    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+      city
+    )}`
+  );
+  const data = await response.json();
+  if (data.length > 0) {
+    return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+  } else {
+    throw new Error("Ville non trouvée");
+  }
+}
+
+// --- Gestion formulaire ---
+const form = document.getElementById("form");
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const name = document.getElementById("name").value.trim();
+  const city = document.getElementById("city").value.trim();
+
+  if (!name || !city) {
+    alert("Merci de remplir les champs nom et ville");
+    return;
+  }
+
+  try {
+    const coords = await getCoordsFromCity(city);
+
+    // Ajouter le marqueur sur la carte
+    L.marker([coords.lat, coords.lng])
+      .addTo(map)
+      .bindPopup(`${name} — ${city}`)
+      .openPopup();
+
+    // Ajouter dans Firestore
+    await addMarker(name, city, coords.lat, coords.lng);
+
+    // Reset formulaire
+    form.reset();
+  } catch (error) {
+    alert(error.message);
   }
 });
+
+// --- Charger les marqueurs au chargement ---
+loadMarkers();
+
