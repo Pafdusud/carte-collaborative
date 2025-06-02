@@ -1,22 +1,30 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Carte Collaborative</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <link rel="stylesheet" href="style.css">
-  <script type="module" src="script.js" defer></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <h1>🗺️ Carte Collaborative</h1>
   <div id="map"></div>
   <form id="form">
-    <input type="text" id="name" placeholder="Votre nom ou pseudo" required>
-    <input type="text" id="city" placeholder="Ville (ex: Paris)" required>
-    <input type="password" id="admin-code" placeholder="Code admin (optionnel)">
+    <input type="text" id="name" placeholder="Votre nom ou pseudo" required />
+    <input type="text" id="city" placeholder="Ville (ex: Paris)" required />
+    <input type="password" id="admin-code" placeholder="Code admin (optionnel)" />
     <button type="submit">Ajouter</button>
   </form>
+
+  <script type="module" src="script.js"></script>
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    crossorigin=""
+  ></script>
 </body>
 </html>
 
