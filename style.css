@@ -2,47 +2,21 @@ body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
-  text-align: center;
-  background: #f4f4f4;
-}
-
-h1 {
-  margin: 20px;
-  font-size: 2em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 #map {
-  height: 400px;
+  height: 500px;
   width: 90%;
-  max-width: 800px;
-  margin: 0 auto 20px auto;
-  border: 2px solid #333;
-  border-radius: 10px;
+  margin: 20px 0;
 }
 
 form {
-  max-width: 800px;
-  margin: auto;
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  flex-direction: column;
+  width: 90%;
+  max-width: 400px;
   gap: 10px;
-}
-
-input, button {
-  padding: 10px;
-  font-size: 1em;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-}
-
-button {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #0056b3;
 }
